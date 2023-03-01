@@ -1,4 +1,4 @@
 # basic_calculator
-It is a functional Streamlit app that allows users to input their daily expenses and calculates the total expenses for the day. It also allows users to set a daily budget and provides feedback on whether they have exceeded their budget. Additionally, it provides a logout feature that sends the user's daily expenses to their email.
+To use the app, simply upload a CSV or Excel file using the file uploader, and then select the dependent and independent variables using the dropdown menus. The app will perform ANOVA analysis on the data and display the ANOVA table, R-squared value, and scatter plots of the dependent variable against each independent variable.
 
-link : "https://shib1111111-basic-calculator-app-rprw64.streamlit.app/"
+link : "https://shib1111111-basic-calculator-app-sj1gev.streamlit.app/"
