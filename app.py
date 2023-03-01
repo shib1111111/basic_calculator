@@ -1,176 +1,50 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import statsmodels.api as sm
 import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objs as go
-from datetime import datetime, timedelta
-from streamlit_tags import st_tags, st_tags_sidebar
+import seaborn as sns
 
-# Importing Firebase libraries for Authentication
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import auth
-from firebase_admin import firestore
+# Set page title
+st.set_page_config(page_title="ANOVA Analysis Tool")
 
-cred = credentials.Certificate("path/to/serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+# Define app function
+def app():
+    # Add a title
+    st.title("ANOVA Analysis Tool")
 
-db = firestore.client()
+    # Add a file uploader so the user can upload a CSV or Excel file
+    data_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
 
-# Setting up the Page Title and Icon
-st.set_page_config(page_title="Expense Tracker", page_icon=":money_with_wings:")
+    # If a file has been uploaded, display the data and perform ANOVA analysis
+    if data_file:
+        df = pd.read_csv(data_file) if data_file.name.endswith(".csv") else pd.read_excel(data_file)
 
-# Setting up the Navigation Bar
-menu = ["Home", "Login", "SignUp"]
-choice = st.sidebar.selectbox("Menu", menu)
+        # Display the data as a table
+        st.write("Data:")
+        st.dataframe(df)
 
-# Home Page
-if choice == "Home":
-    st.title("Welcome to Expense Tracker")
-    st.write("Log in or Sign up to get started.")
-    
-# Login Page
-elif choice == "Login":
-    st.title("Login")
-    email = st.text_input("Email")
-    password = st.text_input("Password", type='password')
-    if st.button("Login"):
-        try:
-            user = auth.get_user_by_email(email)
-            logged_in_user = auth.sign_in_with_email_and_password(email, password)
-            st.success("Logged in as {}".format(email))
-            
-            # Creating a User Data Collection in Firestore
-            user_data = db.collection(u'users').document(logged_in_user['localId'])
-            if not user_data.get().exists:
-                user_data.set({})
-                
-            # Redirecting to the Expense Tracking Page
-            st.session_state.user = logged_in_user
-            st.session_state.email = email
-            st.session_state.user_data = user_data
-            st.experimental_rerun()
-            
-        except auth.AuthError:
-            st.error("Invalid Email or Password")
+        # Allow the user to select the dependent and independent variables
+        dep_variable = st.selectbox("Select dependent variable", df.columns)
+        ind_variable = st.multiselect("Select independent variables", df.columns, default=[df.columns[0]])
 
-# Signup Page
-elif choice == "SignUp":
-    st.title("Sign Up")
-    email = st.text_input("Email")
-    password = st.text_input("Password", type='password')
-    confirm_password = st.text_input("Confirm Password", type='password')
-    if st.button("Sign Up"):
-        if password == confirm_password:
-            try:
-                user = auth.create_user(email=email, password=password)
-                st.success("Account created for {}".format(email))
-                
-                # Creating a User Data Collection in Firestore
-                user_data = db.collection(u'users').document(user.uid)
-                if not user_data.get().exists:
-                    user_data.set({})
-                
-                # Redirecting to the Expense Tracking Page
-                st.session_state.user = user
-                st.session_state.email = email
-                st.session_state.user_data = user_data
-                st.experimental_rerun()
-                
-            except auth.AuthError as e:
-                st.error(e.detail)
-                
-        else:
-            st.error("Passwords do not match")
+        # Perform ANOVA analysis using statsmodels
+        X = sm.add_constant(df[ind_variable])
+        model = sm.OLS(df[dep_variable], X).fit()
+        anova_table = sm.stats.anova_lm(model, typ=2)
 
-# Expense Tracking Page
-if 'user' in st.session_state:
-    st.title("Expense Tracker")
-    st.write("Track your daily expenses here.")
-    
-    # Getting the User's Expense Data from Firestore
-    user_data = st.session_state.user_data
-    expenses = user_data.get().to_dict()
-    
-    # Creating an Empty Expense DataFrame
-    columns = ['Date', 'Category', 'Description', 'Amount']
-    expenses_df = pd.DataFrame(columns=columns)
-    
-    # Adding the Expense Data to the DataFrame
-    if expenses:
-        for date, data in expenses.items():
-            for category, items in data.items():
-                for item in items:
-                    expenses_df = expenses_df.append(pd.Series([date, category,item['description'], item['amount']], index=columns), ignore_index=True)
-    
-    # Displaying the Expense Data in a Table
-    st.write("## Expense Data")
-    st.dataframe(expenses_df)
-    
-    # Getting the User Input for New Expenses
-    st.write("## Add New Expense")
-    date = st.date_input("Date")
-    category = st_tags_sidebar("Select Category", ['Food', 'Housing', 'Transportation', 'Utilities', 'Entertainment', 'Other'])
-    description = st.text_input("Description")
-    amount = st.number_input("Amount", value=0.0, step=0.01)
-    if st.button("Add Expense"):
-        # Adding the Expense Data to Firestore
-        expense_data = {
-            'category': category,
-            'description': description,
-            'amount': amount
-        }
-        if str(date) in expenses:
-            expenses[str(date)][category].append(expense_data)
-        else:
-            expenses[str(date)] = {category: [expense_data]}
-        user_data.set(expenses)
-        st.success("Expense added successfully")
-        
-    # Generating Expense Reports
-    st.write("## Generate Expense Report")
-    start_date = st.date_input("Start Date")
-    end_date = st.date_input("End Date")
-    if start_date <= end_date:
-        # Creating a Filtered Expense DataFrame
-        mask = (expenses_df['Date'] >= start_date) & (expenses_df['Date'] <= end_date)
-        filtered_df = expenses_df.loc[mask]
-        
-        # Displaying the Filtered Expense Data in a Table
-        st.write("### Expense Data for Selected Period")
-        st.dataframe(filtered_df)
-        
-        # Generating a Pie Chart of Expense Categories
-        fig = px.pie(filtered_df, values='Amount', names='Category')
-        st.plotly_chart(fig)
-        
-        # Generating a Line Chart of Daily Expenses
-        daily_expenses = filtered_df.groupby(['Date'])['Amount'].sum().reset_index()
-        daily_expenses['Date'] = pd.to_datetime(daily_expenses['Date'])
-        fig2 = go.Figure()
-        fig2.add_trace(go.Scatter(x=daily_expenses['Date'], y=daily_expenses['Amount'], mode='lines+markers'))
-        fig2.update_layout(title="Daily Expenses", xaxis_title="Date", yaxis_title="Amount")
-        st.plotly_chart(fig2)
-        
-        # Providing Budgeting Advice
-        total_expenses = filtered_df['Amount'].sum()
-        days = (end_date - start_date).days + 1
-        daily_budget = round(0.5 * total_expenses / days, 2)
-        st.write("### Budgeting Advice")
-        st.write("Total Expenses for Selected Period: $", round(total_expenses, 2))
-        st.write("Daily Budget for Selected Period: $", daily_budget)
-        if daily_expenses['Amount'].mean() > daily_budget:
-            st.warning("You are spending more than your budget. Consider reducing your expenses.")
-        else:
-            st.success("You are within your budget. Keep it up!")
-            
-    else:
-        st.error("Error: End Date must be after Start Date.")
-        
-    # Logging Out the User
-    st.write("## Logout")
-    if st.button("Logout"):
-        auth.logout()
-        st.experimental_rerun()
+        # Display the ANOVA table
+        st.write("ANOVA Table:")
+        st.dataframe(anova_table)
 
+        # Get the R-squared value and display it
+        r_squared = model.rsquared
+        st.write(f"R-squared value: {r_squared:.2f}")
+
+        # Plot the dependent variable against each independent variable
+        for variable in ind_variable:
+            fig, ax = plt.subplots()
+            sns.scatterplot(x=variable, y=dep_variable, data=df, ax=ax)
+            st.pyplot(fig)
+
+# Run the app
+app()
