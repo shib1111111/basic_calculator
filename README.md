@@ -1,12 +1,12 @@
 # basic_calculator
-This is a small realistic calculator web app built using the Streamlit framework in Python. It allows users to enter two numbers and select an operation (addition, subtraction, multiplication, or division) to perform on those numbers. The app then displays the result of the calculation.
+This is a concise yet comprehensive calculator web application developed using the Streamlit framework in Python. Users can input two numbers and choose from a selection of arithmetic operations, including addition, subtraction, multiplication, or division. The application then executes the operation and displays the resulting output.
 
-## Project Structure
-The project is structured as follows:
-**app.py**: The main file that defines the Streamlit web app and handles user input/output.
-**calculator_logic.py**: A module that defines the core logic of the calculator (i.e., the calculation functions).
-**requirements.txt**: A file that specifies the Python dependencies required to run the app.
+###The project is well-organized and includes the following files:
+
+**app.py**: This serves as the main file that defines the Streamlit web application and manages user input and output.
+**calculator_logic.py**: This module contains the fundamental logic of the calculator, such as the calculation functions.
+**requirements.txt**: This file lists the required Python dependencies for running the applicatio
 
 ## License
 MIT
-## link : https://shib1111111-basic-calculator-app-sj1gev.streamlit.app/
+### link : https://shib1111111-basic-calculator-app-sj1gev.streamlit.app/
