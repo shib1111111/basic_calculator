@@ -7,11 +7,6 @@ The project is structured as follows:
 **calculator_logic.py**: A module that defines the core logic of the calculator (i.e., the calculation functions).
 **requirements.txt**: A file that specifies the Python dependencies required to run the app.
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
 ## License
 MIT
 ## link : https://shib1111111-basic-calculator-app-sj1gev.streamlit.app/
