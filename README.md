@@ -1,4 +1,17 @@
 # basic_calculator
-To use the app, simply upload a CSV or Excel file using the file uploader, and then select the dependent and independent variables using the dropdown menus. The app will perform ANOVA analysis on the data and display the ANOVA table, R-squared value, and scatter plots of the dependent variable against each independent variable.
+This is a small realistic calculator web app built using the Streamlit framework in Python. It allows users to enter two numbers and select an operation (addition, subtraction, multiplication, or division) to perform on those numbers. The app then displays the result of the calculation.
 
-link : "https://shib1111111-basic-calculator-app-sj1gev.streamlit.app/"
+## Project Structure
+The project is structured as follows:
+**app.py**: The main file that defines the Streamlit web app and handles user input/output.
+**calculator_logic.py**: A module that defines the core logic of the calculator (i.e., the calculation functions).
+**requirements.txt**: A file that specifies the Python dependencies required to run the app.
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+MIT
+# link : "https://shib1111111-basic-calculator-app-sj1gev.streamlit.app/"
