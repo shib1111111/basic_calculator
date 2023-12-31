@@ -13,7 +13,7 @@ The project is well-organized and includes the following files:
 ## Screenshots
 <table align="center">
   <tr>
-    <td><img src="screenshots/home_page.jpg" alt="Home Page"  align="center" width="800" height="600"/></td>
+    <td><img src="screenshots/home_page.jpg" alt="Home Page"  align="center" width="1500" height="600"/></td>
   </tr>
   <tr>
     <td><em>Home Page with outputs </em></td>
